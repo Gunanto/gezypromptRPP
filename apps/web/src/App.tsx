@@ -971,7 +971,7 @@ export default function App() {
       </div>
 
       <footer className="py-6 text-center text-[11px] text-slate-500">
-        PromptRPP · React + Bun + Hono + SQLite · Data proyek tersimpan pada server aplikasi
+        © 2026 GezyTech. Dikembangkan oleh PakGun.
       </footer>
     </div>
   )
