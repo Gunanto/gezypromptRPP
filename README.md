@@ -103,3 +103,6 @@ Contoh unit systemd dan virtual host Nginx tersedia di [`deploy/`](./deploy/).
 Konfigurasi produksi yang digunakan untuk `prompt.gezytech.web.id` menjalankan API
 pada `127.0.0.1:3012`, menyajikan frontend statis melalui Nginx, dan menyimpan
 SQLite di direktori `data/` yang tidak masuk Git.
+
+Hasil build frontend disalin ke `/var/www/promptrpp` agar Nginx dapat membacanya
+tanpa membuka izin direktori home pengguna aplikasi.

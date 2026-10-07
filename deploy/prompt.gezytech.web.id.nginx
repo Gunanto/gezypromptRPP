@@ -3,7 +3,7 @@ server {
     listen [::]:80;
     server_name prompt.gezytech.web.id;
 
-    root /home/ubuntu/gezypromptRPP/apps/web/dist;
+    root /var/www/promptrpp;
     index index.html;
 
     location /api/ {
