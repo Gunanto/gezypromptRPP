@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#155eef">
+  <title>PromptRPP — Generator Prompt Perangkat Ajar</title>
+  <style>
+    :root {
+      --bg: #f3f7ff;
+      --card: #ffffff;
+      --ink: #102a56;
+      --muted: #667085;
+      --line: #dbe5f5;
+      --primary: #155eef;
+      --primary-dark: #1049bd;
+      --primary-soft: #e8f0ff;
+      --success: #07865d;
+      --danger: #c4320a;
+      --dark: #0b1730;
+      --shadow: 0 16px 42px rgba(24, 65, 130, .12);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 2%, rgba(73, 141, 255, .16), transparent 22rem),
+        var(--bg);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(1440px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 34px; }
+
+    header {
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      padding: 31px 34px;
+      border-radius: 25px;
+      background: linear-gradient(128deg, #082e83 0%, #155eef 53%, #52a4ff 100%);
+      box-shadow: 0 20px 44px rgba(18, 77, 178, .25);
+    }
+    header::before, header::after {
+      position: absolute;
+      content: "";
+      border-radius: 50%;
+      background: rgba(255,255,255,.10);
+      pointer-events: none;
+    }
+    header::before { width: 280px; height: 280px; right: -90px; top: -130px; }
+    header::after { width: 170px; height: 170px; right: 170px; bottom: -120px; }
+    .brand { position: relative; z-index: 1; font-weight: 800; font-size: 12px; letter-spacing: 2px; opacity: .88; }
+    h1 { position: relative; z-index: 1; margin: 7px 0 5px; font-size: clamp(29px, 4vw, 45px); letter-spacing: -.04em; }
+    .tagline { position: relative; z-index: 1; margin: 0; max-width: 760px; font-size: 16px; line-height: 1.55; opacity: .95; }
+    .header-notes { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 17px; }
+    .header-note { border: 1px solid rgba(255,255,255,.25); background: rgba(4, 34, 106, .20); border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 750; }
+
+    .layout { display: grid; grid-template-columns: minmax(350px, 430px) minmax(0, 1fr); gap: 22px; margin-top: 22px; align-items: start; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    aside.card { padding: 18px; }
+    main.card { padding: 23px; min-width: 0; }
+
+    .form-title { display: flex; align-items: center; gap: 10px; padding: 4px 4px 17px; }
+    .form-icon { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; background: #e9f1ff; font-size: 20px; }
+    .form-title h2, .preview-head h2 { margin: 0; font-size: 18px; }
+    .form-title p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+    details.section { border-top: 1px solid var(--line); padding: 15px 4px 2px; }
+    details.section:first-of-type { border-top: 0; padding-top: 0; }
+    details.section[open] { padding-bottom: 13px; }
+    summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #173e79; font-size: 14px; font-weight: 800; cursor: pointer; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "⌄"; color: #4770ab; font-size: 19px; transition: transform .15s ease; }
+    details[open] summary::after { transform: rotate(180deg); }
+
+    .section-body { padding-top: 7px; }
+    label { display: block; margin: 12px 0 6px; color: #344665; font-size: 12px; font-weight: 750; }
+    .required::after { content: " *"; color: var(--danger); }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #cdd9ea;
+      border-radius: 10px;
+      padding: 10px 11px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21, 94, 239, .12); }
+    textarea { min-height: 76px; resize: vertical; line-height: 1.45; }
+    .grid2, .grid3 { display: grid; gap: 10px; }
+    .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid3 { grid-template-columns: 1.2fr 1fr 1fr; }
+    .help { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .computed {
+      margin-top: 10px;
+      padding: 10px 11px;
+      border: 1px solid #cfe0fc;
+      border-radius: 11px;
+      background: #f1f6ff;
+      color: #14468e;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .computed b { color: #0b3a7b; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      border: 1px solid #cedaea;
+      border-radius: 10px;
+      padding: 7px 9px;
+      background: #fff;
+      color: #41516d;
+      font-size: 11.5px;
+      font-weight: 720;
+      text-align: left;
+    }
+    .chip:hover { border-color: #8cb3f3; background: #f7faff; }
+    .chip.active { border-color: #6196ed; background: #eaf2ff; color: #1048ac; box-shadow: inset 0 0 0 1px rgba(21,94,239,.05); }
+    .type-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 8px; }
+    .type-chip { min-height: 59px; justify-content: flex-start; align-items: flex-start; flex-direction: column; gap: 3px; }
+    .type-chip span { font-size: 16px; line-height: 1; }
+    .type-chip small { font-size: 10px; font-weight: 650; opacity: .85; }
+    .limit-message { min-height: 16px; margin-top: 6px; color: var(--danger); font-size: 11px; }
+
+    .toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-top: 11px;
+      color: #40526e;
+      font-size: 12px;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+    .toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--primary); flex: 0 0 auto; }
+
+    .form-actions { display: flex; flex-wrap: wrap; gap: 9px; padding: 17px 4px 3px; }
+    button.action { border: 0; border-radius: 11px; padding: 11px 14px; font-weight: 800; font-size: 12px; }
+    .primary { background: var(--primary); color: #fff; }
+    .primary:hover { background: var(--primary-dark); }
+    .secondary { background: #eaf0f8; color: #344665; }
+    .success { background: var(--success); color: #fff; }
+    .ghost { border: 1px solid #cbd8e9 !important; background: #fff; color: #365072; }
+    .status { min-height: 18px; padding: 7px 4px 0; font-size: 11.5px; color: var(--muted); }
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--success); }
+
+    .preview-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+    .preview-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .preview-badges { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+    .badge { white-space: nowrap; padding: 6px 9px; border-radius: 999px; background: #eaf2ff; color: #1251b8; font-size: 10px; font-weight: 850; letter-spacing: .03em; }
+    .badge.dark { background: #e8ecf3; color: #344665; }
+
+    #promptOutput {
+      display: block;
+      min-height: 664px;
+      padding: 18px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--dark);
+      color: #e6efff;
+      box-shadow: inset 0 0 0 1px rgba(149, 188, 255, .15);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.62;
+      tab-size: 2;
+    }
+    #promptOutput:focus { box-shadow: inset 0 0 0 1px #6297ee, 0 0 0 3px rgba(21,94,239,.11); }
+    .preview-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+    .destination { display: flex; gap: 8px; margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--line); }
+    .destination select { max-width: 210px; }
+    .destination .action { white-space: nowrap; }
+
+    .quality { margin-top: 15px; padding: 14px; border: 1px solid #d7e4f8; border-radius: 13px; background: #f8fbff; }
+    .quality h3 { margin: 0 0 8px; color: #244777; font-size: 13px; }
+    .quality ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; padding: 0; margin: 0; list-style: none; }
+    .quality li { color: #5c6f8c; font-size: 11px; line-height: 1.35; }
+    .quality li::before { content: "○"; display: inline-block; width: 15px; color: #7d96bd; font-weight: 900; }
+    .quality li.ready { color: #176b51; }
+    .quality li.ready::before { content: "●"; color: var(--success); }
+    .hint { margin-top: 14px; padding: 12px 13px; border-radius: 12px; border: 1px dashed #b8cae6; color: #4d6384; background: #fbfdff; font-size: 11.5px; line-height: 1.55; }
+    .hint b { color: #244777; }
+    footer { padding: 20px 0 0; text-align: center; color: #8091aa; font-size: 11px; }
+
+    @media (max-width: 1040px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.card { max-width: none; }
+      #promptOutput { min-height: 480px; }
+    }
+    @media (max-width: 640px) {
+      .app { width: min(100% - 20px, 1440px); padding-top: 10px; }
+      header { padding: 25px 20px; border-radius: 19px; }
+      h1 { font-size: 30px; }
+      main.card, aside.card { padding: 15px; border-radius: 16px; }
+      .grid2, .grid3, .quality ul { grid-template-columns: 1fr; }
+      .preview-head { flex-direction: column; }
+      .preview-badges { justify-content: flex-start; }
+      .destination { flex-wrap: wrap; }
+      .destination select { max-width: none; }
+      .type-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">📘 PROMPTRPP</div>
+      <h1>Isi konteksnya. AI menyusun perangkat ajarnya.</h1>
+      <p class="tagline">Generator prompt lintas-AI untuk RPP, modul ajar, LKPD, asesmen, rubrik, media pembelajaran, dan paket perangkat ajar berbasis Pembelajaran Mendalam.</p>
+      <div class="header-notes">
+        <span class="header-note">✦ Prompt siap salin</span>
+        <span class="header-note">◉ Simpan otomatis di perangkat</span>
+        <span class="header-note">▣ Tanpa API atau akun</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="card">
+        <div class="form-title">
+          <div class="form-icon">🗂️</div>
+          <div>
+            <h2>Rancang Prompt Anda</h2>
+            <p>Isi seperlunya; data kosong dapat diberi asumsi wajar.</p>
+          </div>
+        </div>
+
+        <form id="generatorForm" novalidate>
+          <details class="section" open>
+            <summary>1. Jenis dokumen dan identitas</summary>
+            <div class="section-body">
+              <label class="required">Jenis perangkat ajar</label>
+              <div class="type-grid" id="documentTypes">
+                <button class="chip type-chip active" type="button" data-group="documentType" data-value="rpp"><span>📄</span>RPP<small>Rencana pembelajaran</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="modul"><span>📚</span>Modul Ajar<small>Perangkat lengkap</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="mendalam"><span>🧭</span>Rencana PM<small>Pembelajaran Mendalam</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="lkpd"><span>📝</span>LKPD<small>Lembar kerja siswa</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="asesmen"><span>✓</span>Asesmen<small>Instrumen dan kunci</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="rubrik"><span>▦</span>Rubrik<small>Kriteria penilaian</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="media"><span>🖥️</span>Media<small>Rancangan media</small></button>
+                <button class="chip type-chip" type="button" data-group="documentType" data-value="paket"><span>🎒</span>Paket Lengkap<small>Perangkat terpadu</small></button>
+              </div>
+
+              <label for="curriculum">Kurikulum</label>
+              <select id="curriculum" data-save>
+                <option>Kurikulum Merdeka</option>
+                <option>Kurikulum Satuan Pendidikan</option>
+                <option>Kurikulum lainnya</option>
+              </select>
+
+              <label for="subject" class="required">Mata pelajaran</label>
+              <select id="subject" data-save>
+                <option>Matematika</option>
+                <option>Bahasa Indonesia</option>
+                <option>IPA</option>
+                <option>IPS</option>
+                <option>Bahasa Inggris</option>
+                <option>Pendidikan Pancasila</option>
+                <option>Informatika</option>
+                <option>Pendidikan Agama</option>
+                <option>Seni Budaya</option>
+                <option>PJOK</option>
+                <option>Prakarya</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+              <input id="customSubject" data-save placeholder="Tulis mata pelajaran bila memilih Lainnya" style="margin-top:8px">
+
+              <div class="grid3">
+                <div>
+                  <label for="level" class="required">Jenjang</label>
+                  <select id="level" data-save>
+                    <option>SD/MI</option><option>SMP/MTs</option><option>SMA/MA</option><option>SMK/MAK</option><option>PAUD/TK</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="phase">Fase</label>
+                  <input id="phase" data-save placeholder="Contoh: D">
+                </div>
+                <div>
+                  <label for="classroom" class="required">Kelas</label>
+                  <select id="classroom" data-save>
+                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+                    <option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid2">
+                <div>
+                  <label for="semester">Semester</label>
+                  <select id="semester" data-save><option>1</option><option>2</option></select>
+                </div>
+                <div>
+                  <label for="locale">Daerah/lingkungan</label>
+                  <input id="locale" data-save placeholder="Contoh: Kabupaten Sleman">
+                </div>
+              </div>
+              <label for="topic" class="required">Materi pokok</label>
+              <input id="topic" data-save placeholder="Contoh: Persamaan Linear Satu Variabel">
+            </div>
+          </details>
+
+          <details class="section" open>
+            <summary>2. Waktu, capaian, dan siswa</summary>
+            <div class="section-body">
+              <div class="grid3">
+                <div>
+                  <label for="meetings" class="required">Pertemuan</label>
+                  <input id="meetings" data-save type="number" min="1" value="1">
+                </div>
+                <div>
+                  <label for="jp" class="required">JP/pertemuan</label>
+                  <input id="jp" data-save type="number" min="1" value="2">
+                </div>
+                <div>
+                  <label for="minutes" class="required">Menit/JP</label>
+                  <input id="minutes" data-save type="number" min="1" value="40">
+                </div>
+              </div>
+              <div class="computed">Alokasi setiap pertemuan: <b id="perMeetingTime">2 JP × 40 menit = 80 menit</b><br>Total alokasi: <b id="totalTime">2 JP / 80 menit</b></div>
+
+              <label for="cp">Capaian Pembelajaran (CP)</label>
+              <textarea id="cp" data-save placeholder="Tempelkan CP bila sudah tersedia..."></textarea>
+              <label for="tp">Tujuan Pembelajaran (TP)</label>
+              <textarea id="tp" data-save placeholder="Tuliskan tujuan pembelajaran yang ingin dicapai..."></textarea>
+              <label for="initialCompetence">Kompetensi awal</label>
+              <textarea id="initialCompetence" data-save placeholder="Apa yang sudah diketahui atau mampu dilakukan siswa?"></textarea>
+              <label for="students">Karakteristik peserta didik</label>
+              <textarea id="students" data-save placeholder="Contoh: 32 siswa, kemampuan aljabar beragam, sebagian perlu dukungan membaca soal cerita..."></textarea>
+            </div>
+          </details>
+
+          <details class="section">
+            <summary>3. Kerangka Pembelajaran Mendalam</summary>
+            <div class="section-body">
+              <label class="required">Dimensi Profil Lulusan <span style="font-weight:500">(pilih 2–3)</span></label>
+              <div class="chips" id="dimensionChips">
+                <button class="chip" type="button" data-multi="dimensions" data-value="Keimanan dan Ketakwaan terhadap Tuhan YME">Keimanan & Ketakwaan</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Kewargaan">Kewargaan</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Penalaran Kritis">Penalaran Kritis</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Kreativitas">Kreativitas</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Kolaborasi">Kolaborasi</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Kemandirian">Kemandirian</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Kesehatan">Kesehatan</button>
+                <button class="chip" type="button" data-multi="dimensions" data-value="Komunikasi">Komunikasi</button>
+              </div>
+              <div class="limit-message" id="dimensionMessage"></div>
+
+              <label>Praktik pedagogis</label>
+              <div class="chips" id="practiceChips">
+                <button class="chip active" type="button" data-group="practice" data-value="Inkuiri terbimbing">Inkuiri terbimbing</button>
+                <button class="chip" type="button" data-group="practice" data-value="Problem Based Learning (PBL)">PBL</button>
+                <button class="chip" type="button" data-group="practice" data-value="Project Based Learning (PjBL)">PjBL</button>
+                <button class="chip" type="button" data-group="practice" data-value="Discovery Learning">Discovery</button>
+                <button class="chip" type="button" data-group="practice" data-value="Diskusi kolaboratif">Diskusi</button>
+                <button class="chip" type="button" data-group="practice" data-value="Diferensiasi adaptif">Diferensiasi</button>
+              </div>
+              <input id="customPractice" data-save placeholder="Atau tulis praktik pedagogis lain" style="margin-top:8px">
+
+              <label for="localContext">Isu atau konteks lokal</label>
+              <textarea id="localContext" data-save placeholder="Masalah nyata atau pengalaman yang dekat dengan siswa..."></textarea>
+              <label for="partnership">Kemitraan pembelajaran</label>
+              <input id="partnership" data-save placeholder="Contoh: orang tua, pedagang lokal, tidak ada">
+              <label for="environment">Lingkungan pembelajaran</label>
+              <input id="environment" data-save placeholder="Contoh: kelas berkelompok, budaya bertanya aman, LMS sekolah">
+              <label for="digital">Pemanfaatan digital</label>
+              <textarea id="digital" data-save placeholder="Alat/platform, batasan, dan etika penggunaan; kosongkan bila tidak digunakan."></textarea>
+              <label for="crossDiscipline">Lintas disiplin</label>
+              <input id="crossDiscipline" data-save placeholder="Contoh: IPA dan Bahasa Indonesia / Tidak ada">
+              <label for="resources">Media dan sumber belajar</label>
+              <textarea id="resources" data-save placeholder="Contoh: LKPD, kartu soal, timbangan sederhana, buku siswa..."></textarea>
+            </div>
+          </details>
+
+          <details class="section">
+            <summary>4. Preferensi keluaran</summary>
+            <div class="section-body">
+              <label>Tingkat keluaran</label>
+              <div class="chips" id="outputLevelChips">
+                <button class="chip" type="button" data-group="outputLevel" data-value="Ringkas">Ringkas</button>
+                <button class="chip" type="button" data-group="outputLevel" data-value="Rinci">Rinci</button>
+                <button class="chip active" type="button" data-group="outputLevel" data-value="Skenario Mengajar Sangat Rinci">Skenario Sangat Rinci</button>
+              </div>
+              <p class="help">Pilihan sangat rinci menghasilkan langkah bernomor, tindakan guru/siswa, waktu, bukti belajar, dan blok Pembelajaran Mendalam.</p>
+
+              <label class="toggle"><input id="assume" data-save type="checkbox" checked> Lengkapi data kosong dengan asumsi wajar berlabel <code>[ASUMSI]</code>.</label>
+              <label class="toggle"><input id="differentiation" data-save type="checkbox" checked> Aktifkan diferensiasi konten, proses, dan/atau produk.</label>
+              <label class="toggle"><input id="literacy" data-save type="checkbox" checked> Integrasikan literasi dan numerasi jika relevan.</label>
+              <label class="toggle"><input id="pse" data-save type="checkbox" checked> Integrasikan pembelajaran sosial-emosional dan kebiasaan baik jika relevan.</label>
+              <label class="toggle"><input id="diagnostic" data-save type="checkbox" checked> Sertakan asesmen diagnostik.</label>
+              <label class="toggle"><input id="formative" data-save type="checkbox" checked> Sertakan asesmen formatif <em>(for learning)</em>.</label>
+              <label class="toggle"><input id="asLearning" data-save type="checkbox" checked> Sertakan refleksi diri/penilaian sejawat <em>(as learning)</em>.</label>
+              <label class="toggle"><input id="summative" data-save type="checkbox"> Sertakan asesmen sumatif <em>(of learning)</em>.</label>
+              <label class="toggle"><input id="staged" data-save type="checkbox" checked> Minta AI berhenti setelah peta alur dan Pertemuan 1.</label>
+
+              <label for="assessmentFocus">Fokus asesmen/rubrik <span style="font-weight:500">(jika dipilih)</span></label>
+              <select id="assessmentFocus" data-save>
+                <option>Campuran sesuai kebutuhan</option>
+                <option>Diagnostik</option>
+                <option>Formatif (for learning)</option>
+                <option>As learning</option>
+                <option>Sumatif (of learning)</option>
+              </select>
+              <label for="assessmentProduct">Produk/kinerja yang dinilai <span style="font-weight:500">(opsional)</span></label>
+              <input id="assessmentProduct" data-save placeholder="Contoh: presentasi solusi, proyek poster, penyelesaian soal">
+              <label for="mediaFormat">Jenis media <span style="font-weight:500">(jika dipilih)</span></label>
+              <input id="mediaFormat" data-save placeholder="Contoh: slide interaktif, video singkat, game kartu">
+            </div>
+          </details>
+
+          <div class="form-actions">
+            <button class="action primary" id="generate" type="submit">⚡ Generate Prompt</button>
+            <button class="action secondary" id="reset" type="button">↺ Reset</button>
+          </div>
+          <div class="status" id="status" aria-live="polite"></div>
+        </form>
+      </aside>
+
+      <main class="card">
+        <div class="preview-head">
+          <div>
+            <h2 id="previewTitle">Prompt RPP Siap Salin</h2>
+            <p id="previewSubtitle">Masukkan Materi Pokok lalu klik Generate Prompt.</p>
+          </div>
+          <div class="preview-badges">
+            <span class="badge" id="typeBadge">RPP</span>
+            <span class="badge dark">OFFLINE · 1 FILE</span>
+          </div>
+        </div>
+
+        <textarea id="promptOutput" aria-label="Prompt yang dihasilkan" spellcheck="false" readonly></textarea>
+
+        <div class="preview-actions">
+          <button class="action success" id="copy" type="button">📋 Salin Prompt</button>
+          <button class="action ghost" id="download" type="button">⇩ Unduh .MD</button>
+          <button class="action ghost" id="downloadDoc" type="button">⇩ Unduh .DOC</button>
+          <button class="action ghost" id="nextPrompt" type="button">→ Prompt Pertemuan Berikutnya</button>
+          <button class="action ghost" id="print" type="button">🖨️ Cetak</button>
+        </div>
+
+        <div class="destination">
+          <select id="destination" aria-label="Tujuan AI">
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="codex">Codex / ChatGPT</option>
+            <option value="muse">Muse</option>
+          </select>
+          <button class="action primary" id="openDestination" type="button">Salin & Buka AI ↗</button>
+        </div>
+
+        <div class="quality">
+          <h3>Checklist prompt</h3>
+          <ul id="qualityList">
+            <li data-check="topic">Materi pokok</li>
+            <li data-check="time">Alokasi waktu</li>
+            <li data-check="goals">CP atau TP</li>
+            <li data-check="students">Karakteristik siswa</li>
+            <li data-check="dimensions">2–3 Dimensi Profil Lulusan</li>
+            <li data-check="context">Konteks atau sumber belajar</li>
+          </ul>
+        </div>
+
+        <div class="hint">
+          <b>Cara pakai:</b> klik <b>Salin Prompt</b> atau <b>Salin & Buka AI</b>, lalu tempelkan prompt ke percakapan baru pada layanan pilihan Anda. Aplikasi ini tidak mengirim data Anda ke layanan AI mana pun.
+        </div>
+      </main>
+    </div>
+
+    <footer>PROMPTRPP · Generator Prompt Perangkat Ajar · Simpan dan olah data di perangkat Anda</footer>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const storageKey = "promptRppFormV1";
+
+    const documentTypes = {
+      rpp: { label: "RPP", title: "Prompt RPP Siap Salin", subtitle: "Rencana pembelajaran operasional dengan langkah kegiatan rinci." },
+      modul: { label: "MODUL AJAR", title: "Prompt Modul Ajar Siap Salin", subtitle: "Perangkat ajar lengkap yang dapat disunting guru." },
+      mendalam: { label: "RENCANA PM", title: "Prompt Rencana PM Siap Salin", subtitle: "Rencana Pembelajaran berbasis Pembelajaran Mendalam." },
+      lkpd: { label: "LKPD", title: "Prompt LKPD Siap Salin", subtitle: "Lembar kerja siswa yang terhubung dengan tujuan belajar." },
+      asesmen: { label: "ASESMEN", title: "Prompt Asesmen Siap Salin", subtitle: "Instrumen, kunci, dan bukti belajar yang relevan." },
+      rubrik: { label: "RUBRIK", title: "Prompt Rubrik Siap Salin", subtitle: "Kriteria penilaian yang jelas dan dapat digunakan guru." },
+      media: { label: "MEDIA", title: "Prompt Media Pembelajaran Siap Salin", subtitle: "Rancangan media pembelajaran yang aktif dan kontekstual." },
+      paket: { label: "PAKET LENGKAP", title: "Prompt Paket Perangkat Ajar Siap Salin", subtitle: "Rangkaian perangkat ajar yang saling terhubung." }
+    };
+
+    const destinations = {
+      chatgpt: "https://chatgpt.com/",
+      claude: "https://claude.ai/new",
+      deepseek: "https://chat.deepseek.com/",
+      codex: "https://chatgpt.com/",
+      muse: "https://muse.ai/"
+    };
+
+    const state = {
+      documentType: "rpp",
+      practice: "Inkuiri terbimbing",
+      outputLevel: "Skenario Mengajar Sangat Rinci",
+      dimensions: []
+    };
+
+    const defaultPreview = `PROMPTRPP — GENERATOR PROMPT PERANGKAT AJAR
+
+1. Pilih jenis perangkat ajar di panel kiri.
+2. Isi minimal Materi Pokok dan alokasi waktu.
+3. Pilih dua atau tiga Dimensi Profil Lulusan jika menggunakan Pembelajaran Mendalam.
+4. Klik GENERATE PROMPT.
+
+Prompt yang terbentuk dapat disalin ke ChatGPT, Claude, DeepSeek, Codex, Muse, atau layanan AI lain.`;
+
+    function value(id) {
+      return $(id).value.trim();
+    }
+
+    function checked(id) {
+      return $(id).checked;
+    }
+
+    function subject() {
+      return value("subject") === "Lainnya" && value("customSubject") ? value("customSubject") : value("subject");
+    }
+
+    function fallback(input, text) {
+      return input || (checked("assume") ? `[ASUMSI] ${text}` : "[BELUM DIISI]");
+    }
+
+    function updateTime() {
+      const meetings = Math.max(1, Number(value("meetings")) || 1);
+      const jp = Math.max(1, Number(value("jp")) || 1);
+      const minutes = Math.max(1, Number(value("minutes")) || 1);
+      const perMeeting = jp * minutes;
+      const totalJp = meetings * jp;
+      const totalMinutes = meetings * perMeeting;
+      $("perMeetingTime").textContent = `${jp} JP × ${minutes} menit = ${perMeeting} menit`;
+      $("totalTime").textContent = `${totalJp} JP / ${totalMinutes} menit untuk ${meetings} pertemuan`;
+      return { meetings, jp, minutes, perMeeting, totalJp, totalMinutes };
+    }
+
+    function syncSingleChips(group) {
+      $$(`[data-group="${group}"]`).forEach((chip) => chip.classList.toggle("active", chip.dataset.value === state[group]));
+    }
+
+    function setDocumentType(type) {
+      state.documentType = type;
+      syncSingleChips("documentType");
+      const meta = documentTypes[type];
+      $("previewTitle").textContent = meta.title;
+      $("previewSubtitle").textContent = meta.subtitle;
+      $("typeBadge").textContent = meta.label;
+      saveState();
+    }
+
+    function toggleDimension(chip) {
+      const item = chip.dataset.value;
+      const index = state.dimensions.indexOf(item);
+      if (index >= 0) {
+        state.dimensions.splice(index, 1);
+        $("dimensionMessage").textContent = "";
+      } else if (state.dimensions.length >= 3) {
+        $("dimensionMessage").textContent = "Pilih maksimal tiga dimensi agar fokus.";
+        return;
+      } else {
+        state.dimensions.push(item);
+        $("dimensionMessage").textContent = "";
+      }
+      $$('[data-multi="dimensions"]').forEach((button) => button.classList.toggle("active", state.dimensions.includes(button.dataset.value)));
+      renderQuality();
+      saveState();
+    }
+
+    function booleanText(active, yes, no) {
+      return active ? yes : no;
+    }
+
+    function inputData() {
+      const time = updateTime();
+      const customPractice = value("customPractice");
+      return {
+        ...time,
+        type: documentTypes[state.documentType],
+        typeKey: state.documentType,
+        subject: subject(),
+        curriculum: value("curriculum"),
+        level: value("level"),
+        phase: fallback(value("phase"), "Tentukan fase yang sesuai dengan jenjang dan kelas."),
+        classroom: value("classroom"),
+        semester: value("semester"),
+        locale: fallback(value("locale"), "Gunakan konteks kehidupan sehari-hari peserta didik."),
+        topic: value("topic"),
+        cp: fallback(value("cp"), "Gunakan CP yang sesuai tanpa mengarang rumusan resmi."),
+        tp: fallback(value("tp"), "Rumuskan 2–3 tujuan pembelajaran yang terukur."),
+        initialCompetence: fallback(value("initialCompetence"), "Tentukan kompetensi awal yang wajar untuk materi ini."),
+        students: fallback(value("students"), `Peserta didik ${value("level")} kelas ${value("classroom")} dengan kesiapan belajar beragam.`),
+        dimensions: state.dimensions.length ? state.dimensions.join("; ") : fallback("", "Pilih dua atau tiga Dimensi Profil Lulusan yang paling relevan."),
+        practice: customPractice || state.practice,
+        localContext: fallback(value("localContext"), "Gunakan masalah atau pengalaman yang dekat dengan kehidupan peserta didik."),
+        partnership: fallback(value("partnership"), "Tidak ada kemitraan khusus."),
+        environment: fallback(value("environment"), "Kelas yang aman untuk bertanya, berpendapat, dan mencoba."),
+        digital: fallback(value("digital"), "Tidak menggunakan alat digital khusus."),
+        crossDiscipline: fallback(value("crossDiscipline"), "Tidak ada lintas disiplin khusus."),
+        resources: fallback(value("resources"), "Gunakan media sederhana dan sumber belajar yang tersedia di sekolah."),
+        outputLevel: state.outputLevel,
+        differentiation: booleanText(checked("differentiation"), "AKTIF — rancang diferensiasi konten, proses, dan/atau produk secara spesifik.", "TIDAK DIAKTIFKAN — gunakan satu rancangan yang sesuai mayoritas siswa."),
+        literacy: booleanText(checked("literacy"), "AKTIF JIKA RELEVAN — integrasikan secara alami.", "Hanya gunakan jika mutlak diperlukan oleh materi."),
+        pse: booleanText(checked("pse"), "AKTIF JIKA RELEVAN — masukkan regulasi diri, empati, kerja sama, atau kebiasaan baik melalui tindakan nyata.", "Tidak perlu ditambahkan kecuali relevan."),
+        diagnostic: booleanText(checked("diagnostic"), "AKTIF", "TIDAK AKTIF"),
+        formative: booleanText(checked("formative"), "AKTIF", "TIDAK AKTIF"),
+        asLearning: booleanText(checked("asLearning"), "AKTIF", "TIDAK AKTIF"),
+        summative: booleanText(checked("summative"), "AKTIF", "TIDAK AKTIF"),
+        assessmentFocus: value("assessmentFocus"),
+        assessmentProduct: fallback(value("assessmentProduct"), "Tentukan bukti kinerja atau produk yang paling relevan dengan tujuan pembelajaran."),
+        mediaFormat: fallback(value("mediaFormat"), "Tentukan media pembelajaran yang paling sesuai dan dapat diakses siswa.")
+      };
+    }
+
+    function learningBlockContract() {
+      return `SISTEM BLOK PEMBELAJARAN MENDALAM
+Jangan memakai singkatan M, A, R, Bks, Bmk, atau Mgb.
+Pada setiap langkah kegiatan, gunakan nama lengkap dalam format Markdown:
+> 🟦 **Pengalaman belajar:** Memahami
+> 🟩 **Prinsip pembelajaran:** Bermakna · 🟨 Menggembirakan
+
+Pilihan penanda:
+- Pengalaman belajar: 🟦 Memahami, 🟧 Mengaplikasi, atau 🟪 Merefleksi.
+- Prinsip pembelajaran: 🔷 Berkesadaran, 🟩 Bermakna, atau 🟨 Menggembirakan.
+Gunakan blok tersebut hanya bila ada tindakan nyata yang mendukungnya. Warna bukan satu-satunya penanda; selalu tulis istilah lengkap.`;
+    }
+
+    function detailedStepsContract(data) {
+      if (data.outputLevel === "Ringkas") {
+        return `LANGKAH PEMBELAJARAN RINGKAS
+Sajikan tabel per pertemuan dengan kolom: Tahap | Aktivitas Guru | Aktivitas Siswa | Waktu | Bukti Belajar/Asesmen.
+Tetap tuliskan pertanyaan atau instruksi inti secara spesifik dan pastikan total waktu tepat ${data.perMeeting} menit per pertemuan.`;
+      }
+
+      const highDetail = data.outputLevel === "Skenario Mengajar Sangat Rinci";
+      return `LANGKAH PEMBELAJARAN ${highDetail ? "SANGAT RINCI" : "RINCI"}
+Jangan sajikan langkah pembelajaran utama dalam tabel ringkas. Tulis sebagai urutan aktivitas bernomor dan operasional seperti skenario mengajar yang dapat langsung digunakan guru.
+
+Untuk setiap pertemuan gunakan struktur ini:
+## Pertemuan [NOMOR]: [Fokus materi]
+**Alokasi:** ${data.jp} JP × ${data.minutes} menit = ${data.perMeeting} menit
+**Praktik pedagogis:** ${data.practice}
+
+### A. Kegiatan Pendahuluan ([jumlah menit])
+1. **[Nama aktivitas spesifik] ([menit] menit)**
+   > [emoji] **Pengalaman belajar:** [Memahami/Mengaplikasi/Merefleksi]
+   > [emoji] **Prinsip pembelajaran:** [Berkesadaran/Bermakna/Menggembirakan; pilih yang relevan]
+   - Guru: [tindakan konkret, instruksi atau pertanyaan].
+   - Siswa: [tindakan konkret dan hasil yang diharapkan].
+   - **Bukti belajar:** [jika ada].
+
+### B. Kegiatan Inti ([jumlah menit])
+Bagi menjadi tahap yang sesuai dengan ${data.practice}, misalnya mengamati masalah, menyusun dugaan, menyelidiki, menerapkan konsep, menganalisis kekeliruan, mempresentasikan, atau merefleksi. Lanjutkan nomor aktivitas secara berurutan. Ulangi dua blok informasi pada setiap aktivitas.
+
+### C. Kegiatan Penutup ([jumlah menit])
+Sertakan tiket keluar atau unjuk kerja singkat, refleksi terstruktur, penguatan, dan tindak lanjut yang relevan.
+
+**Rekap waktu:** pendahuluan [...] + inti [...] + penutup [...] = ${data.perMeeting} menit.
+
+ATURAN MUTU LANGKAH
+1. Hindari “siswa berdiskusi”, “guru menjelaskan”, atau “siswa mengerjakan LKPD” tanpa topik, pertanyaan, langkah kerja, hasil kerja, dan alasan pedagogis yang jelas.
+2. Setiap aktivitas inti menyebut tindakan guru, tindakan siswa, instruksi atau pertanyaan konkret, serta produk atau bukti belajar.
+3. Tuliskan contoh masalah, data, atau kasus yang relevan dengan materi ${data.topic} dan konteks ${data.locale}.
+4. Jika diferensiasi aktif, masukkan langsung ke langkah: siapa yang mendapat dukungan, bentuk dukungan, dan aktivitas tantangan.
+5. Jumlah waktu seluruh aktivitas harus tepat sama dengan ${data.perMeeting} menit.`;
+    }
+
+    function planningOutputContract(data) {
+      return `FORMAT OUTPUT WAJIB — ${data.type.label}
+Gunakan Markdown.
+1. Identitas Pembelajaran
+2. Capaian dan Tujuan Pembelajaran
+3. Matriks Keterkaitan Pembelajaran
+   - Tabel: Tujuan Pembelajaran | Aktivitas Kunci | Bukti Belajar | Asesmen | Dimensi Profil Lulusan yang Dikembangkan.
+4. Kompetensi Awal
+5. Sarana, Media, dan Sumber Belajar
+6. Praktik Pedagogis, Kemitraan, Lingkungan, dan Pemanfaatan Digital
+7. Pemahaman Bermakna
+8. Pertanyaan Pemantik
+9. Peta Alur Antarpertemuan dan Langkah Pembelajaran Rinci
+10. Diferensiasi Pembelajaran
+11. Asesmen
+12. Remedial dan Pengayaan
+13. Refleksi Guru dan Peserta Didik
+14. Lampiran yang relevan
+15. Daftar Asumsi dan Hal yang Perlu Diverifikasi`;
+    }
+
+    function typeSpecificContract(data) {
+      switch (data.typeKey) {
+        case "rpp":
+          return `FOKUS JENIS DOKUMEN — RPP
+Susun RPP yang operasional dan proporsional. Utamakan urutan kegiatan pembelajaran, waktu, bukti belajar, dan tindak lanjut. Jangan membuat lampiran yang tidak relevan.`;
+        case "modul":
+          return `FOKUS JENIS DOKUMEN — MODUL AJAR
+Selain rencana pembelajaran, sertakan bahan ajar ringkas, LKPD yang selaras, asesmen yang relevan, rubrik bila dibutuhkan, remedial, dan pengayaan. Setiap komponen harus terhubung dengan tujuan pembelajaran.`;
+        case "mendalam":
+          return `FOKUS JENIS DOKUMEN — RENCANA PEMBELAJARAN BERBASIS PEMBELAJARAN MENDALAM
+Jelaskan hubungan nyata antara aktivitas, Dimensi Profil Lulusan yang dipilih, pengalaman belajar, prinsip pembelajaran, dan bukti belajar. Jangan menggunakan istilah Pembelajaran Mendalam secara kosmetik.`;
+        case "lkpd":
+          return `FOKUS JENIS DOKUMEN — LKPD
+Buat LKPD yang dapat langsung diberikan kepada siswa.
+Format wajib:
+1. Identitas LKPD dan tujuan kegiatan.
+2. Pemahaman bermakna dan pertanyaan pemantik singkat.
+3. Alat/bahan atau sumber yang diperlukan.
+4. Petunjuk kerja bernomor dengan bahasa sesuai usia siswa.
+5. Aktivitas inti yang konkret, ruang atau format jawaban, dan data/kasus yang relevan.
+6. Dukungan dan tantangan diferensiasi bila aktif.
+7. Refleksi siswa.
+8. Kunci/pedoman jawaban dan rubrik singkat untuk guru.
+Pastikan LKPD mengarahkan siswa memahami, mengaplikasi, lalu merefleksi; jangan hanya berisi soal hafalan.`;
+        case "asesmen":
+          return `FOKUS JENIS DOKUMEN — ASESMEN
+Fokus asesmen: ${data.assessmentFocus}.
+Produk/kinerja yang dinilai: ${data.assessmentProduct}.
+Format wajib:
+1. Tujuan dan indikator yang diukur.
+2. Kisi-kisi: tujuan | materi/keterampilan | indikator | bentuk instrumen | nomor.
+3. Instrumen yang siap digunakan, lengkap dengan stimulus atau konteks yang konkret.
+4. Kunci jawaban atau pedoman penskoran.
+5. Rubrik bila instrumennya kinerja/produk.
+6. Interpretasi hasil dan tindak lanjut.
+Bedakan fungsi diagnostik, formatif, as learning, dan sumatif. Jangan memaksakan semua jenis jika tidak relevan.`;
+        case "rubrik":
+          return `FOKUS JENIS DOKUMEN — RUBRIK PENILAIAN
+Produk/kinerja yang dinilai: ${data.assessmentProduct}.
+Format wajib:
+1. Tujuan penilaian dan bukti yang dikumpulkan.
+2. Kriteria yang terhubung langsung dengan tujuan pembelajaran dan Dimensi Profil Lulusan yang dipilih.
+3. Tabel rubrik analitik dengan 3–4 tingkat kinerja, deskriptor yang dapat diamati, dan skor.
+4. Cara menghitung atau menginterpretasikan skor.
+5. Umpan balik yang dapat diberikan guru kepada siswa.
+Hindari kriteria kabur seperti “bagus” atau “aktif”; gunakan perilaku, produk, atau penalaran yang dapat diamati.`;
+        case "media":
+          return `FOKUS JENIS DOKUMEN — MEDIA PEMBELAJARAN
+Jenis media yang diharapkan: ${data.mediaFormat}.
+Rancang media pembelajaran yang mendorong aktivitas siswa, bukan presentasi pasif.
+Format wajib:
+1. Tujuan media dan pengguna.
+2. Konsep media serta alur pengalaman belajar.
+3. Struktur halaman/slide/segmen bernomor.
+4. Isi teks singkat, visual, interaksi, instruksi, dan umpan balik pada setiap bagian.
+5. Desain aksesibel: keterbacaan, kontras, bahasa sesuai usia, dan alternatif bila teknologi terbatas.
+6. Cara guru menggunakan media sebelum, saat, dan setelah pembelajaran.
+7. Asesmen atau bukti belajar yang dihasilkan dari penggunaan media.`;
+        case "paket":
+          return `FOKUS JENIS DOKUMEN — PAKET PERANGKAT AJAR LENGKAP
+Susun paket yang saling terhubung: rencana pembelajaran, LKPD, asesmen, rubrik, bahan ajar/media ringkas, remedial, dan pengayaan.
+Jangan menduplikasi isi tanpa fungsi. Tunjukkan hubungan setiap komponen dengan tujuan pembelajaran dan bukti belajar.`;
+        default:
+          return "";
+      }
+    }
+
+    function stagedContract(data) {
+      const needsPlan = ["rpp", "modul", "mendalam", "paket"].includes(data.typeKey);
+      if (!checked("staged") || !needsPlan) return "";
+      return `CARA KELUARAN BERTAHAP — WAJIB
+Karena dokumen mencakup ${data.meetings} pertemuan, jangan membuat seluruh skenario rinci sekaligus.
+
+Tahap 1:
+1. Buat bagian identitas hingga pertanyaan pemantik.
+2. Buat peta alur seluruh ${data.meetings} pertemuan.
+3. Buat langkah pembelajaran rinci hanya untuk Pertemuan 1.
+4. Berhenti dan tanyakan tepat dengan kalimat: “Apakah saya lanjutkan ke Pertemuan 2?”
+
+Tahap lanjutan:
+1. Ketika pengguna menjawab lanjut, buat hanya satu pertemuan berikutnya secara rinci.
+2. Setelah semua pertemuan selesai, tanyakan apakah pengguna ingin melanjutkan ke asesmen, rubrik, remedial, pengayaan, refleksi, dan lampiran.
+3. Buat bagian tersebut hanya setelah pengguna menyatakan lanjut.`;
+    }
+
+    function buildPrompt(showErrors = true) {
+      const data = inputData();
+      if (!data.topic) {
+        if (showErrors) setStatus("Isi Materi Pokok terlebih dahulu.", "error");
+        $("topic").focus();
+        return false;
+      }
+      const requiresDimensions = data.typeKey === "mendalam";
+      if ((requiresDimensions && state.dimensions.length < 2) || (state.dimensions.length && state.dimensions.length < 2)) {
+        if (showErrors) setStatus(requiresDimensions ? "Rencana Pembelajaran Mendalam memerlukan dua atau tiga Dimensi Profil Lulusan." : "Pilih minimal dua Dimensi Profil Lulusan atau kosongkan pilihan agar AI membuat asumsi.", "error");
+        return false;
+      }
+
+      const needsPlan = ["rpp", "modul", "mendalam", "paket"].includes(data.typeKey);
+      const planningContract = needsPlan ? planningOutputContract(data) : "";
+      const stepsContract = needsPlan ? detailedStepsContract(data) : "";
+
+      const prompt = `# PROMPTRPP — ${data.type.label.toUpperCase()}
+
+PERAN
+Anda adalah perancang pembelajaran berpengalaman untuk jenjang ${data.level} di Indonesia.
+Gunakan kerangka Pembelajaran Mendalam, Panduan Pembelajaran dan Asesmen edisi revisi 2025, panduan mata pelajaran yang relevan, serta standar proses sebagai acuan konseptual.
+Jadikan CP dan TP dari pengguna sebagai sumber utama. Jangan mengklaim dokumen telah sesuai regulasi secara resmi. Jangan mengarang kutipan, nomor regulasi, atau rumusan CP resmi.
+
+KONTEKS PEMBELAJARAN
+- Jenis dokumen: ${data.type.label}
+- Kurikulum: ${data.curriculum}
+- Mata pelajaran: ${data.subject}
+- Jenjang / Fase / Kelas / Semester: ${data.level} / ${data.phase} / ${data.classroom} / ${data.semester}
+- Materi pokok: ${data.topic}
+- Jumlah pertemuan: ${data.meetings}
+- Alokasi setiap pertemuan: ${data.jp} JP × ${data.minutes} menit = ${data.perMeeting} menit
+- Total alokasi: ${data.totalJp} JP / ${data.totalMinutes} menit
+- Daerah/lingkungan siswa: ${data.locale}
+
+CAPAIAN PEMBELAJARAN
+${data.cp}
+
+TUJUAN PEMBELAJARAN
+${data.tp}
+
+KOMPETENSI AWAL
+${data.initialCompetence}
+
+KARAKTERISTIK PESERTA DIDIK
+${data.students}
+
+KERANGKA PEMBELAJARAN MENDALAM
+- Dimensi Profil Lulusan yang dituju: ${data.dimensions}
+- Prinsip pembelajaran: berkesadaran, bermakna, menggembirakan
+- Pengalaman belajar: memahami, mengaplikasi, merefleksi
+- Praktik pedagogis: ${data.practice}
+- Isu atau konteks lokal: ${data.localContext}
+- Kemitraan pembelajaran: ${data.partnership}
+- Lingkungan pembelajaran: ${data.environment}
+- Pemanfaatan digital: ${data.digital}
+- Lintas disiplin: ${data.crossDiscipline}
+- Media dan sumber belajar: ${data.resources}
+
+PREFERENSI
+- Diferensiasi: ${data.differentiation}
+- Literasi dan numerasi: ${data.literacy}
+- Pembelajaran sosial-emosional dan kebiasaan baik: ${data.pse}
+- Asesmen diagnostik: ${data.diagnostic}
+- Asesmen formatif (for learning): ${data.formative}
+- Asesmen sebagai pembelajaran (as learning): ${data.asLearning}
+- Asesmen sumatif (of learning): ${data.summative}
+- Tingkat keluaran: ${data.outputLevel}
+
+TUGAS
+Susun ${data.type.label} yang realistis, kontekstual, dan siap disunting guru berdasarkan data di atas.
+Pastikan tujuan, aktivitas, bukti belajar, dan asesmen selalu terhubung.
+
+ATURAN KUALITAS
+1. Gunakan bahasa Indonesia baku yang mudah dipahami guru dan sesuai usia siswa.
+2. Hindari aktivitas generik. Tulis pertanyaan konkret, contoh, langkah kerja, dan produk belajar yang jelas.
+3. Gunakan contoh yang dekat dengan kehidupan peserta didik di ${data.locale}.
+4. Jika data kosong, gunakan asumsi wajar dan tandai dengan [ASUMSI].
+5. Pilih hanya dua atau tiga Dimensi Profil Lulusan yang benar-benar dapat dikembangkan dan diamati.
+6. Jangan memaksakan doa, kegiatan keagamaan, teknologi, kemitraan, atau konteks lokal jika tidak relevan atau tidak disediakan.
+7. Jangan menambahkan bagian yang tidak relevan; nyatakan “tidak diperlukan” bila diperlukan.
+8. Periksa secara diam-diam bahwa setiap tujuan pembelajaran memiliki aktivitas dan bukti asesmen yang sesuai.
+
+${learningBlockContract()}
+
+${typeSpecificContract(data)}
+
+${planningContract}
+
+${stepsContract}
+
+${stagedContract(data)}`;
+
+      $("promptOutput").value = prompt.replace(/\n{3,}/g, "\n\n");
+      setStatus("Prompt berhasil dibuat dan siap disalin.", "ok");
+      saveState();
+      return true;
+    }
+
+    function buildNextPrompt() {
+      const data = inputData();
+      if (!data.topic) {
+        setStatus("Isi Materi Pokok sebelum membuat prompt lanjutan.", "error");
+        $("topic").focus();
+        return;
+      }
+      const prompt = `LANJUTKAN PERENCANAAN PEMBELAJARAN
+
+Gunakan seluruh konteks, CP, TP, peta alur, dan gaya keluaran dari respons Anda sebelumnya.
+
+Sekarang buat langkah pembelajaran rinci hanya untuk pertemuan berikutnya.
+- Materi pokok: ${data.topic}
+- Alokasi: ${data.jp} JP × ${data.minutes} menit = ${data.perMeeting} menit
+- Praktik pedagogis: ${data.practice}
+- Tingkat keluaran: ${data.outputLevel}
+
+Tulis kegiatan pendahuluan, inti, dan penutup sebagai urutan aktivitas bernomor yang operasional.
+Untuk setiap aktivitas, sertakan tindakan guru, tindakan siswa, instruksi/pertanyaan konkret, bukti belajar jika ada, serta blok:
+> [emoji] **Pengalaman belajar:** [Memahami/Mengaplikasi/Merefleksi]
+> [emoji] **Prinsip pembelajaran:** [Berkesadaran/Bermakna/Menggembirakan]
+
+Pastikan rekap waktu tepat ${data.perMeeting} menit. Setelah pertemuan ini selesai, berhenti dan tanyakan apakah saya ingin melanjutkan ke pertemuan berikutnya.`;
+      $("promptOutput").value = prompt;
+      setStatus("Prompt lanjutan siap disalin ke percakapan AI yang sama.", "ok");
+    }
+
+    function setStatus(message, type = "") {
+      const status = $("status");
+      status.textContent = message;
+      status.className = `status ${type}`;
+    }
+
+    function renderQuality() {
+      const checks = {
+        topic: Boolean(value("topic")),
+        time: Number(value("meetings")) > 0 && Number(value("jp")) > 0 && Number(value("minutes")) > 0,
+        goals: Boolean(value("cp") || value("tp")),
+        students: Boolean(value("students")),
+        dimensions: state.dimensions.length >= 2 && state.dimensions.length <= 3,
+        context: Boolean(value("localContext") || value("resources"))
+      };
+      $$("#qualityList li").forEach((item) => item.classList.toggle("ready", checks[item.dataset.check]));
+    }
+
+    function saveState() {
+      const formState = {};
+      $$("[data-save]").forEach((element) => {
+        formState[element.id] = element.type === "checkbox" ? element.checked : element.value;
+      });
+      localStorage.setItem(storageKey, JSON.stringify({ formState, state }));
+    }
+
+    function restoreState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (!saved) return;
+        Object.entries(saved.formState || {}).forEach(([id, savedValue]) => {
+          const element = $(id);
+          if (!element) return;
+          if (element.type === "checkbox") element.checked = Boolean(savedValue);
+          else element.value = savedValue;
+        });
+        if (saved.state) {
+          state.documentType = saved.state.documentType || state.documentType;
+          state.practice = saved.state.practice || state.practice;
+          state.outputLevel = saved.state.outputLevel || state.outputLevel;
+          state.dimensions = Array.isArray(saved.state.dimensions) ? saved.state.dimensions.slice(0, 3) : [];
+        }
+      } catch (error) {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    async function copyPrompt() {
+      const text = $("promptOutput").value;
+      if (!text || text === defaultPreview) {
+        setStatus("Generate prompt terlebih dahulu.", "error");
+        return false;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        $("promptOutput").focus();
+        $("promptOutput").select();
+        document.execCommand("copy");
+      }
+      setStatus("Prompt berhasil disalin ke clipboard.", "ok");
+      return true;
+    }
+
+    function downloadPrompt() {
+      const text = $("promptOutput").value;
+      if (!text || text === defaultPreview) {
+        setStatus("Generate prompt terlebih dahulu.", "error");
+        return;
+      }
+      const name = promptFileName();
+      const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `PromptRPP-${name}.md`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+      setStatus("Prompt Markdown berhasil diunduh.", "ok");
+    }
+
+    function promptFileName() {
+      return (value("topic") || "Perangkat-Ajar").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-") || "Perangkat-Ajar";
+    }
+
+    function escapeHtml(string) {
+      return string.replace(/[&<>]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[character]));
+    }
+
+    function downloadDoc() {
+      const text = $("promptOutput").value;
+      if (!text || text === defaultPreview) {
+        setStatus("Generate prompt terlebih dahulu.", "error");
+        return;
+      }
+      const markup = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PromptRPP</title></head><body><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:11pt;line-height:1.5;color:#102a56">${
+        escapeHtml(text)
+      }</pre></body></html>`;
+      const blob = new Blob([markup], { type: "application/msword;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `PromptRPP-${promptFileName()}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+      setStatus("Dokumen Word berhasil diunduh.", "ok");
+    }
+
+    function printPrompt() {
+      const text = $("promptOutput").value;
+      if (!text || text === defaultPreview) {
+        setStatus("Generate prompt terlebih dahulu.", "error");
+        return;
+      }
+      const tab = window.open("", "_blank");
+      if (!tab) {
+        setStatus("Browser memblokir jendela cetak. Izinkan pop-up lalu coba lagi.", "error");
+        return;
+      }
+      tab.document.write(`<!DOCTYPE html><title>PromptRPP</title><pre style="white-space:pre-wrap;font:13px/1.55 Arial,sans-serif;color:#102a56;padding:28px">${escapeHtml(text)}</pre>`);
+      tab.document.close();
+      tab.focus();
+      tab.print();
+    }
+
+    function openDestination() {
+      const text = $("promptOutput").value;
+      if (!text || text === defaultPreview) {
+        setStatus("Generate prompt terlebih dahulu.", "error");
+        return;
+      }
+      const url = destinations[value("destination")];
+      const tab = window.open(url, "_blank", "noopener");
+      if (!tab) {
+        setStatus("Browser memblokir tab baru. Salin prompt lalu buka layanan AI secara manual.", "error");
+        return;
+      }
+      copyPrompt();
+      setStatus("Prompt disalin. Tempelkan pada tab AI yang baru dibuka.", "ok");
+    }
+
+    function resetForm() {
+      $("generatorForm").reset();
+      state.documentType = "rpp";
+      state.practice = "Inkuiri terbimbing";
+      state.outputLevel = "Skenario Mengajar Sangat Rinci";
+      state.dimensions = [];
+      setDocumentType("rpp");
+      syncSingleChips("practice");
+      syncSingleChips("outputLevel");
+      $$('[data-multi="dimensions"]').forEach((chip) => chip.classList.remove("active"));
+      $("dimensionMessage").textContent = "";
+      updateTime();
+      renderQuality();
+      localStorage.removeItem(storageKey);
+      $("promptOutput").value = defaultPreview;
+      setStatus("Form telah direset.", "ok");
+    }
+
+    function setupEvents() {
+      $$("[data-group]").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const group = chip.dataset.group;
+          state[group] = chip.dataset.value;
+          if (group === "documentType") setDocumentType(chip.dataset.value);
+          else {
+            syncSingleChips(group);
+            saveState();
+          }
+        });
+      });
+      $$('[data-multi="dimensions"]').forEach((chip) => chip.addEventListener("click", () => toggleDimension(chip)));
+      $$("[data-save]").forEach((element) => {
+        element.addEventListener("input", () => {
+          updateTime();
+          renderQuality();
+          saveState();
+        });
+        element.addEventListener("change", () => {
+          updateTime();
+          renderQuality();
+          saveState();
+        });
+      });
+      $("generatorForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        buildPrompt(true);
+      });
+      $("reset").addEventListener("click", resetForm);
+      $("copy").addEventListener("click", copyPrompt);
+      $("download").addEventListener("click", downloadPrompt);
+      $("downloadDoc").addEventListener("click", downloadDoc);
+      $("print").addEventListener("click", printPrompt);
+      $("nextPrompt").addEventListener("click", buildNextPrompt);
+      $("openDestination").addEventListener("click", openDestination);
+    }
+
+    restoreState();
+    setupEvents();
+    setDocumentType(state.documentType);
+    syncSingleChips("practice");
+    syncSingleChips("outputLevel");
+    $$('[data-multi="dimensions"]').forEach((chip) => chip.classList.toggle("active", state.dimensions.includes(chip.dataset.value)));
+    updateTime();
+    renderQuality();
+    $("promptOutput").value = value("topic") ? "" : defaultPreview;
+    if (value("topic")) buildPrompt(false);
+  </script>
+</body>
+</html>
